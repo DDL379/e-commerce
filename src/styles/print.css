@@ -1,0 +1,19 @@
+@media print {
+  body * {
+    visibility: hidden; /* ซ่อนหน้าแอปทั้งหมด */
+  }
+  #print-section, #print-section * {
+    visibility: visible; /* โชว์เฉพาะส่วนใบเสร็จ */
+  }
+  #print-section {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 80mm; /* หรือ 58mm ตามเครื่องคุณแบงค์ */
+    font-family: 'Tahoma', sans-serif;
+  }
+  .line {
+    border-bottom: 1px dashed black; /* เส้นประตัดรายการอาหาร */
+    margin: 5px 0;
+  }
+}
