@@ -1,9 +1,11 @@
-// KitchenModal.jsx
+import { useRef } from "react";
+import { useReactToPrint } from "react-to-print";
+import { Check } from "lucide-react";
+import KitchenSlip from "../../KitchenSlip";
 
 const KitchenModal = ({ isOpen, onClose, orderData }) => {
   const componentRef = useRef(null);
 
-  // สั่งพิมพ์
   const handlePrint = useReactToPrint({
     content: () => componentRef.current, // ดึงค่าจาก ref โดยตรง
     removeAfterPrint: true,
@@ -50,3 +52,4 @@ const KitchenModal = ({ isOpen, onClose, orderData }) => {
     </div>
   );
 };
+export default KitchenModal;
