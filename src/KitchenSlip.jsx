@@ -2,11 +2,7 @@ const KitchenSlip = ({ data }) => {
   const items = data?.items || data?.cartItems || [];
 
   return (
-    /* เพิ่ม id="print-section" และปรับ w-full เพื่อให้ CSS @media print เป็นตัวคุมขนาดเอง */
-    <div
-      id="print-section"
-      className="w-full max-w-[80mm] p-2 bg-white text-black font-sans leading-tight"
-    >
+    <div className="w-full max-w-[80mm] p-2 bg-white text-black font-sans leading-tight">
       {/* --- เริ่มต้น Code เดิมของคุณแบงค์ --- */}
       <div className="text-center border-b-4 border-black pb-2 mb-3">
         <div className="text-3xl font-black text-center uppercase tracking-tighter">
