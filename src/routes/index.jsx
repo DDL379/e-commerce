@@ -7,6 +7,7 @@ import DashboardPage from "../pages/dashboard/DashboardPage";
 import AdminPage from "../pages/admin/AdminPage";
 import OrderHistoryPage from "../pages/pos/OrderHistoryPage";
 import DailyReportPage from "../pages/pos/DailyReportPage";
+import PrintPage from "../pages/pos/PrintPage";
 
 const router = createBrowserRouter([
   {
@@ -42,6 +43,7 @@ const router = createBrowserRouter([
       { path: "history", element: <OrderHistoryPage /> },
     ],
   },
+  { path: "/print-order", element: <PrintPage /> },
   {
     path: "*",
     element: (

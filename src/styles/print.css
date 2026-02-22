@@ -1,0 +1,40 @@
+@media print {
+  /* 1. ตั้งค่าหน้ากระดาษ: บังคับขนาด 58mm (มาตรฐานเครื่องเล็ก) หรือปรับเป็น 80mm */
+  @page {
+    margin: 0;
+    size: 58mm auto;
+  }
+
+  /* 2. ซ่อนส่วนประกอบที่ไม่ใช่ใบเสร็จ (เช่น ปุ่มกด, แถบเมนู) */
+  .no-print, 
+  nav, 
+  footer, 
+  button {
+    display: none !important;
+  }
+
+  /* 3. จัดการ Body ให้ขาวสะอาดและไม่มีขอบ */
+  body {
+    margin: 0;
+    padding: 0;
+    background: white;
+    -webkit-print-color-adjust: exact; /* บังคับให้สีและพื้นหลังติดออกมาด้วย */
+    print-color-adjust: exact;
+  }
+
+  /* 4. ปรับแต่งตัวใบเสร็จให้เต็มหน้ากระดาษพอดี */
+  .slip-body {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 2mm !important; /* เว้นขอบจิ๋วๆ กันตัวหนังสือหลุดขอบกระดาษ */
+    margin: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  /* 5. บังคับฟอนต์ให้ชัดเจน (เครื่องพิมพ์ความร้อนชอบตัวหนา) */
+  .item-name, 
+  .item-qty {
+    font-weight: bold !important;
+  }
+}
