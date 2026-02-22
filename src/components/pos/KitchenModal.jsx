@@ -8,10 +8,17 @@ const KitchenModal = ({ isOpen, onClose, orderData }) => {
 
   const isReady = orderData && (orderData.items || orderData.cartItems);
 
-  // ✅ แก้ไข: ใช้ฟังก์ชัน content เพื่อดึงข้อมูลล่าสุดจาก ref ในจังหวะที่กดพิมพ์จริงๆ
+  // ใน KitchenModal.jsx
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
-    documentTitle: `Kitchen-Slip-Table-${orderData?.tableNumber || "N-A"}`,
+    documentTitle: `Order-${orderData?.tableNumber}`,
+    onBeforeGetContent: () => {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve();
+        }, 300);
+      });
+    },
   });
 
   if (!isOpen) return null;
@@ -28,7 +35,6 @@ const KitchenModal = ({ isOpen, onClose, orderData }) => {
             />
           </div>
         </div>
-
         <div className="text-center mb-8 sm:mb-10">
           <h3 className="text-2xl sm:text-3xl font-black text-zinc-900 leading-tight">
             สั่งอาหารสำเร็จ!
@@ -37,20 +43,19 @@ const KitchenModal = ({ isOpen, onClose, orderData }) => {
             Order sent to kitchen
           </p>
         </div>
-
-        {/* ✅ ส่วนที่ซ่อน Slip สำหรับพิมพ์ */}
-        <div style={{ display: "none" }}>
-          {" "}
-          {/* ใช้ display none สำหรับพิมพ์ได้เหมือนกัน หรือใช้พิกัดลบแบบเดิมก็ได้ */}
+        {/* ✅ ส่วนที่ซ่อน Slip สำหรับพิมพ์ */}ฃ{" "}
+        <div
+          style={{
+            position: "absolute",
+            top: "-9999px",
+            left: "-9999px",
+            opacity: 0,
+          }}
+        >
           <div ref={componentRef}>
-            {/* ✅ ใส่ key เพื่อบังคับให้ React Re-render ข้อมูลใหม่ทุกครั้งที่ orderData เปลี่ยน */}
-            <KitchenSlip
-              key={orderData?.id || JSON.stringify(orderData?.items)}
-              data={orderData}
-            />
+            <KitchenSlip key={orderData?.id} data={orderData} />
           </div>
         </div>
-
         <div className="flex flex-col gap-3 sm:gap-4 pb-6 sm:pb-0">
           <button
             disabled={!isReady}

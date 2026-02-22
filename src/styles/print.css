@@ -1,28 +1,41 @@
 @media print {
-  /* ล้างระยะขอบที่เบราว์เซอร์ชอบใส่มาให้เอง */
   @page {
     margin: 0;
-    size: auto;
+    size: 58mm auto; /* ระบุขนาดกระดาษให้ชัดเจน */
   }
 
-  body {
-    margin: 0;
-    padding: 0;
+  /* ซ่อนทุกอย่างยกเว้นส่วนที่ต้องการพิมพ์ */
+  html, body {
+    height: auto;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff;
+    overflow: visible; /* สำคัญ: ป้องกันหน้าพิมพ์ว่างเปล่าในมือถือ */
   }
 
   body * {
     visibility: hidden;
   }
 
-  #print-section, #print-section * {
-    visibility: visible;
+  /* แสดงเฉพาะส่วนใบเสร็จ */
+  #print-section, 
+  #print-section * {
+    visibility: visible !important;
   }
 
   #print-section {
     position: absolute;
     left: 0;
     top: 0;
-    width: 58mm; /* ปรับให้ตรงกับ POS58 */
-    padding: 2mm;
+    width: 58mm; /* ขนาดพอดีเป๊ะสำหรับ POS58 */
+    padding: 0;
+    margin: 0;
+    border: none;
+    display: block !important;
+  }
+
+  /* ซ่อน Header/Footer ของ Browser (URL, วันที่) */
+  header, footer, nav {
+    display: none !important;
   }
 }
