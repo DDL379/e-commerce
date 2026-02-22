@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useCallback } from "react"; // เพิ่ม useCallback
 import { useReactToPrint } from "react-to-print";
 import { Check } from "lucide-react";
 import KitchenSlip from "../../KitchenSlip";
@@ -8,16 +8,16 @@ const KitchenModal = ({ isOpen, onClose, orderData }) => {
 
   const isReady = orderData && (orderData.items || orderData.cartItems);
 
+  // ✅ แก้ไข: ใช้ฟังก์ชัน content เพื่อดึงข้อมูลล่าสุดจาก ref ในจังหวะที่กดพิมพ์จริงๆ
   const handlePrint = useReactToPrint({
-    contentRef: componentRef,
+    content: () => componentRef.current,
+    documentTitle: `Kitchen-Slip-Table-${orderData?.tableNumber || "N-A"}`,
   });
 
   if (!isOpen) return null;
 
   return (
-    // ✅ ปรับเป็น items-end บนมือถือ (เด้งขึ้นจากล่าง) / items-center บนจอปกติ
     <div className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-zinc-900/60 backdrop-blur-md animate-in fade-in duration-300">
-      {/* ✅ ปรับ rounded-t สำหรับมือถือเพื่อให้ดูทันสมัยเหมือนแอป iOS/Android */}
       <div className="bg-white rounded-t-[3.5rem] sm:rounded-[3rem] p-8 sm:p-10 w-full sm:max-w-sm shadow-2xl animate-in slide-in-from-bottom sm:zoom-in duration-500 overflow-hidden">
         <div className="flex justify-center mb-6 sm:mb-8">
           <div className="bg-green-100 p-4 sm:p-5 rounded-full ring-4 sm:ring-8 ring-green-50 animate-bounce duration-700">
@@ -38,10 +38,16 @@ const KitchenModal = ({ isOpen, onClose, orderData }) => {
           </p>
         </div>
 
-        {/* ✅ ซ่อน Slip ไว้สำหรับการพิมพ์ (ซ่อนไว้ให้ไกลสายตา) */}
-        <div style={{ position: "absolute", left: "-9999px", top: "-9999px" }}>
+        {/* ✅ ส่วนที่ซ่อน Slip สำหรับพิมพ์ */}
+        <div style={{ display: "none" }}>
+          {" "}
+          {/* ใช้ display none สำหรับพิมพ์ได้เหมือนกัน หรือใช้พิกัดลบแบบเดิมก็ได้ */}
           <div ref={componentRef}>
-            <KitchenSlip data={orderData} />
+            {/* ✅ ใส่ key เพื่อบังคับให้ React Re-render ข้อมูลใหม่ทุกครั้งที่ orderData เปลี่ยน */}
+            <KitchenSlip
+              key={orderData?.id || JSON.stringify(orderData?.items)}
+              data={orderData}
+            />
           </div>
         </div>
 
@@ -49,7 +55,6 @@ const KitchenModal = ({ isOpen, onClose, orderData }) => {
           <button
             disabled={!isReady}
             onClick={handlePrint}
-            // ✅ ปรับสีให้เป็นสีเขียว (Success) หรือส้มตามแบรนด์คุณแบงค์ เพื่อสื่อถึงการทำสำเร็จ
             className={`w-full py-5 rounded-[1.75rem] font-black text-lg transition-all shadow-xl active:scale-95 flex items-center justify-center gap-2 ${
               !isReady
                 ? "bg-zinc-100 text-zinc-300"
