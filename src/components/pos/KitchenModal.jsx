@@ -7,28 +7,27 @@ const KitchenModal = ({ isOpen, onClose, orderData }) => {
   const componentRef = useRef(null);
 
   const handlePrint = useReactToPrint({
-    contentRef: componentRef,
-    documentTitle: `Order-Table-${orderData?.tableNumber || "N-A"}`,
+    content: () => componentRef.current,
+    onAfterPrint: () => {
+      console.log("Print Success");
+    },
   });
 
   if (!isOpen) return null;
 
-  const isReady = orderData && (orderData.items || orderData.cartItems);
-
   return (
     <>
-      {/* 1. ส่วนสำหรับพิมพ์ (อยู่นอก Modal เพื่อไม่ให้ Mobile Browser สับสน) */}
+      {/* 1. ส่วนสำหรับพิมพ์: แยกออกมานอก Modal และใช้เทคนิคซ่อนแบบ "มีตัวตน" */}
       <div
         style={{
-          position: "fixed",
-          left: "-9999px",
-          top: "0",
-          height: "0",
-          overflow: "hidden",
+          position: "absolute",
+          top: "-9999px",
+          left: "0",
+          width: "58mm", // ระบุขนาดที่แน่นอน
+          zIndex: -1,
         }}
       >
         <div ref={componentRef} className="bg-white p-2">
-          {/* ใส่ key เพื่อบังคับให้อัปเดตข้อมูลล่าสุดเสมอ */}
           <KitchenSlip key={orderData?.id || Date.now()} data={orderData} />
         </div>
       </div>
@@ -46,37 +45,22 @@ const KitchenModal = ({ isOpen, onClose, orderData }) => {
             <h3 className="text-2xl font-black text-zinc-900">
               สั่งอาหารสำเร็จ!
             </h3>
-            <p className="text-zinc-500 text-sm font-bold mt-1">
-              ส่งรายการเข้าครัวแล้ว
-            </p>
-          </div>
-
-          {/* แสดงตัวอย่างให้เห็นในเครื่องเราเองเฉยๆ แต่ไม่ต้องใช้ Ref ตรงนี้ */}
-          <div className="mb-6 border-2 border-dashed border-zinc-200 rounded-2xl p-2 bg-zinc-50 overflow-hidden">
-            <div className="max-h-[120px] overflow-y-auto scrollbar-hide rounded-xl opacity-60">
-              <KitchenSlip data={orderData} />
-            </div>
-            <p className="text-center text-[10px] text-zinc-400 font-bold mt-2">
-              --- พิมพ์ใบสั่งครัวด้านล่าง ---
-            </p>
           </div>
 
           <div className="flex flex-col gap-3">
             <button
-              disabled={!isReady}
-              onClick={() => handlePrint()}
-              className={`w-full py-5 rounded-[1.75rem] font-black text-lg transition-all active:scale-95 shadow-xl ${
-                !isReady
-                  ? "bg-zinc-100 text-zinc-300"
-                  : "bg-zinc-900 text-white shadow-zinc-200"
-              }`}
+              onClick={() => {
+                // ✅ เรียกพิมพ์ตรงๆ
+                handlePrint();
+              }}
+              className="w-full py-5 rounded-[1.75rem] font-black text-lg bg-zinc-900 text-white shadow-xl active:scale-95"
             >
-              {isReady ? "พิมพ์ใบสั่งครัว" : "กำลังโหลดข้อมูล..."}
+              พิมพ์ใบสั่งครัว
             </button>
 
             <button
               onClick={onClose}
-              className="w-full py-4 text-zinc-400 font-bold uppercase text-xs tracking-widest"
+              className="w-full py-4 text-zinc-400 font-bold"
             >
               ปิดหน้าต่าง
             </button>
