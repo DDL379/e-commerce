@@ -8,16 +8,21 @@ const KitchenModal = ({ isOpen, onClose, orderData }) => {
 
   const isReady = orderData && (orderData.items || orderData.cartItems);
 
-  // ใน KitchenModal.jsx
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
-    documentTitle: `Order-${orderData?.tableNumber}`,
-    onBeforeGetContent: () => {
+    onBeforeGetContent: async () => {
       return new Promise((resolve) => {
         setTimeout(() => {
           resolve();
-        }, 300);
+        }, 400);
       });
+    },
+    onAfterPrint: () => {
+      console.log("พิมพ์เสร็จแล้ว");
+    },
+    onPrintError: (error) => {
+      console.error("การพิมพ์ผิดพลาด:", error);
+      alert("ไม่สามารถเปิดหน้าพิมพ์ได้ กรุณาลองใหม่อีกครั้ง");
     },
   });
 
@@ -43,13 +48,13 @@ const KitchenModal = ({ isOpen, onClose, orderData }) => {
             Order sent to kitchen
           </p>
         </div>
-        {/* ✅ ส่วนที่ซ่อน Slip สำหรับพิมพ์ */}ฃ{" "}
+        {/* ✅ ส่วนที่ซ่อน Slip สำหรับพิมพ์ */} {/* ใน KitchenModal.jsx */}
         <div
           style={{
-            position: "absolute",
-            top: "-9999px",
-            left: "-9999px",
+            height: "0px",
+            overflow: "hidden",
             opacity: 0,
+            pointerEvents: "none",
           }}
         >
           <div ref={componentRef}>
