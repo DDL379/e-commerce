@@ -1,19 +1,28 @@
 @media print {
+  /* ล้างระยะขอบที่เบราว์เซอร์ชอบใส่มาให้เอง */
+  @page {
+    margin: 0;
+    size: auto;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
   body * {
-    visibility: hidden; /* ซ่อนหน้าแอปทั้งหมด */
+    visibility: hidden;
   }
+
   #print-section, #print-section * {
-    visibility: visible; /* โชว์เฉพาะส่วนใบเสร็จ */
+    visibility: visible;
   }
+
   #print-section {
     position: absolute;
     left: 0;
     top: 0;
-    width: 80mm; /* หรือ 58mm ตามเครื่องคุณแบงค์ */
-    font-family: 'Tahoma', sans-serif;
-  }
-  .line {
-    border-bottom: 1px dashed black; /* เส้นประตัดรายการอาหาร */
-    margin: 5px 0;
+    width: 58mm; /* ปรับให้ตรงกับ POS58 */
+    padding: 2mm;
   }
 }
