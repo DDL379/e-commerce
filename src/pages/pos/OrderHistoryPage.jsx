@@ -7,6 +7,7 @@ import {
   ReceiptText,
   Clock,
   CalendarDays,
+  Wallet, // เพิ่ม Icon Wallet
 } from "lucide-react";
 import OrderDetailModal from "../../components/dashboard/OrderDetailModal";
 
@@ -20,6 +21,7 @@ const OrderHistoryPage = () => {
 
   useEffect(() => {
     fetchHistory();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterType, selectedDate]);
 
   const fetchHistory = async () => {
@@ -58,6 +60,19 @@ const OrderHistoryPage = () => {
     });
   };
 
+  // ✅ คำนวณยอดขายรวม (ไม่รวมบิลที่ยกเลิก)
+  const totalSales = orders.reduce((sum, order) => {
+    if (order.status !== "CANCELLED") {
+      return sum + Number(order.totalAmount || 0);
+    }
+    return sum;
+  }, 0);
+
+  // ✅ นับจำนวนบิลที่สำเร็จ
+  const completedOrdersCount = orders.filter(
+    (order) => order.status !== "CANCELLED",
+  ).length;
+
   return (
     <div className="flex flex-col gap-6 pb-32 max-w-2xl mx-auto px-2 sm:px-0">
       <header className="px-2 pt-4 sm:pt-6">
@@ -65,24 +80,32 @@ const OrderHistoryPage = () => {
           Order <span className="text-orange-500">History</span>
         </h2>
 
-        {/* Filter Type Toggle - ปรับให้ดูเป็น Tabs ที่กดง่าย */}
+        {/* Filter Type Toggle */}
         <div className="flex bg-zinc-100 p-1 rounded-2xl mt-6">
           <button
             onClick={() => setFilterType("daily")}
-            className={`flex-1 py-3 rounded-xl text-xs font-black transition-all ${filterType === "daily" ? "bg-white text-zinc-900 shadow-sm" : "text-zinc-400"}`}
+            className={`flex-1 py-3 rounded-xl text-xs font-black transition-all ${
+              filterType === "daily"
+                ? "bg-white text-zinc-900 shadow-sm"
+                : "text-zinc-400"
+            }`}
           >
             รายวัน
           </button>
           <button
             onClick={() => setFilterType("monthly")}
-            className={`flex-1 py-3 rounded-xl text-xs font-black transition-all ${filterType === "monthly" ? "bg-white text-zinc-900 shadow-sm" : "text-zinc-400"}`}
+            className={`flex-1 py-3 rounded-xl text-xs font-black transition-all ${
+              filterType === "monthly"
+                ? "bg-white text-zinc-900 shadow-sm"
+                : "text-zinc-400"
+            }`}
           >
             รายเดือน
           </button>
         </div>
       </header>
 
-      {/* Date Selector Control - ปรับให้กดถนัดมือ */}
+      {/* Date Selector Control */}
       <div className="px-2">
         <div className="bg-zinc-900 text-white rounded-[2rem] p-2 flex items-center justify-between shadow-xl shadow-zinc-200">
           <button
@@ -112,6 +135,30 @@ const OrderHistoryPage = () => {
           </button>
         </div>
       </div>
+
+      {/* ✅ การ์ดสรุปยอดรวม (Total Summary Card) */}
+      {!loading && (
+        <div className="px-2">
+          <div className="bg-orange-500 rounded-[2rem] p-6 text-white shadow-xl shadow-orange-200 flex items-center justify-between">
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-orange-200 mb-1">
+                {filterType === "daily"
+                  ? "ยอดขายรวมประจำวัน"
+                  : "ยอดขายรวมประจำเดือน"}
+              </p>
+              <h3 className="text-4xl sm:text-5xl font-black italic tracking-tighter">
+                ฿{totalSales.toLocaleString()}
+              </h3>
+              <p className="text-xs font-bold text-orange-100 mt-1">
+                จากทั้งหมด {completedOrdersCount} บิลสำเร็จ
+              </p>
+            </div>
+            <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center shrink-0">
+              <Wallet size={28} className="text-white" />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Orders List */}
       <div className="space-y-3 px-2">
@@ -190,12 +237,16 @@ const OrderHistoryPage = () => {
 
                 <div className="text-right shrink-0">
                   <p
-                    className={`font-black text-lg tabular-nums ${isCancelled ? "text-red-500" : "text-zinc-900"}`}
+                    className={`font-black text-lg tabular-nums ${
+                      isCancelled ? "text-red-500" : "text-zinc-900"
+                    }`}
                   >
                     ฿{Number(order.totalAmount).toLocaleString()}
                   </p>
                   <span
-                    className={`text-[9px] font-black uppercase tracking-widest ${isCancelled ? "text-red-400" : "text-green-500"}`}
+                    className={`text-[9px] font-black uppercase tracking-widest ${
+                      isCancelled ? "text-red-400" : "text-green-500"
+                    }`}
                   >
                     {isCancelled ? "Cancelled" : order.paymentMethod}
                   </span>
