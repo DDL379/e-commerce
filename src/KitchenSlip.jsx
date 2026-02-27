@@ -67,6 +67,20 @@ const KitchenSlip = ({ data }) => {
                         ** ไม่ใส่: {opt.excluded.join(", ")}
                       </div>
                     )}
+
+                    {/* ✅ ส่วนที่เพิ่มมาใหม่ 1: ท็อปปิ้ง (Extra Addons) */}
+                    {opt.extraAddons && opt.extraAddons.length > 0 && (
+                      <div className="text-xl text-zinc-900 font-[1000] mt-2 px-2 py-1 bg-zinc-100 border-l-4 border-zinc-900">
+                        + ท็อปปิ้ง: {opt.extraAddons.join(", ")}
+                      </div>
+                    )}
+
+                    {/* ✅ ส่วนที่เพิ่มมาใหม่ 2: หมายเหตุ (Note) */}
+                    {opt.note && (
+                      <div className="text-xl text-zinc-900 font-[1000] mt-2 px-2 py-2 border-2 border-dashed border-zinc-900 rounded-lg break-words">
+                        📝 หมายเหตุ: {opt.note}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

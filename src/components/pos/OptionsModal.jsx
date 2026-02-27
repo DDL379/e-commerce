@@ -14,6 +14,10 @@ const OptionsModal = ({ product, isOpen, onClose, onConfirm }) => {
   ]);
   const [excludedItems, setExcludedItems] = useState([]);
 
+  // ✅ 1. เพิ่ม State สำหรับ ท็อปปิ้ง และ หมายเหตุ
+  const [extraAddons, setExtraAddons] = useState([]);
+  const [note, setNote] = useState("");
+
   useEffect(() => {
     if (isOpen) {
       setSelectedSize({ name: "S", extraPrice: 0 });
@@ -21,12 +25,17 @@ const OptionsModal = ({ product, isOpen, onClose, onConfirm }) => {
       setNoodle("เส้นเล็ก");
       setSelectedIngredients(["ใส่ครบทุกอย่าง"]);
       setExcludedItems([]);
+      setExtraAddons([]); // เคลียร์ท็อปปิ้ง
+      setNote(""); // เคลียร์หมายเหตุ
     }
   }, [isOpen, product]);
 
   if (!isOpen) return null;
 
-  const totalPrice = (product?.price || 0) + selectedSize.extraPrice;
+  // ✅ 2. คำนวณราคาใหม่: ราคาอาหาร + ไซส์ + (จำนวนท็อปปิ้ง * 10 บาท)
+  const addonPrice = extraAddons.length * 10;
+  const totalPrice =
+    (product?.price || 0) + selectedSize.extraPrice + addonPrice;
 
   const toggleIngredient = (ing) => {
     if (ing === "ใส่ครบทุกอย่าง") {
@@ -49,6 +58,13 @@ const OptionsModal = ({ product, isOpen, onClose, onConfirm }) => {
     );
   };
 
+  // ✅ 3. ฟังก์ชันสลับเลือกท็อปปิ้ง
+  const toggleAddon = (addon) => {
+    setExtraAddons((prev) =>
+      prev.includes(addon) ? prev.filter((a) => a !== addon) : [...prev, addon],
+    );
+  };
+
   const handleConfirm = () => {
     const options = {
       size: selectedSize.name,
@@ -56,6 +72,8 @@ const OptionsModal = ({ product, isOpen, onClose, onConfirm }) => {
       noodle: noodle,
       ingredients: selectedIngredients,
       excluded: excludedItems,
+      extraAddons: extraAddons, // ส่งข้อมูลท็อปปิ้ง
+      note: note, // ส่งข้อมูลหมายเหตุ
       totalPrice: totalPrice,
     };
     onConfirm(product, options);
@@ -63,11 +81,9 @@ const OptionsModal = ({ product, isOpen, onClose, onConfirm }) => {
   };
 
   return (
-    // ✅ items-end บนมือถือเพื่อให้กดง่าย / items-center บนจอใหญ่
     <div className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm p-0 sm:p-4 animate-in fade-in duration-200">
-      {/* ✅ ปรับความกว้างและมุมโค้งให้รับกับมือถือ */}
       <div className="bg-white w-full sm:max-w-md rounded-t-[3rem] sm:rounded-[2.5rem] shadow-2xl overflow-hidden animate-in slide-in-from-bottom sm:zoom-in duration-300 flex flex-col max-h-[92vh] sm:max-h-[85vh]">
-        {/* Header - เน้นชื่อเมนูและราคา */}
+        {/* Header */}
         <div className="p-6 sm:p-8 border-b border-gray-100 flex justify-between items-center bg-white sticky top-0 z-10">
           <div>
             <h3 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight leading-none">
@@ -75,6 +91,11 @@ const OptionsModal = ({ product, isOpen, onClose, onConfirm }) => {
             </h3>
             <p className="text-sm text-orange-500 font-black mt-1">
               ฿{totalPrice.toLocaleString()}
+              {addonPrice > 0 && (
+                <span className="text-xs text-zinc-400 ml-1">
+                  (+ท็อปปิ้ง {addonPrice}฿)
+                </span>
+              )}
             </p>
           </div>
           <button
@@ -85,9 +106,9 @@ const OptionsModal = ({ product, isOpen, onClose, onConfirm }) => {
           </button>
         </div>
 
-        {/* Content - จัด Grid ให้กดง่ายขึ้นบนนิ้วสัมผัส */}
+        {/* Content */}
         <div className="p-6 space-y-8 overflow-y-auto custom-scrollbar flex-1 pb-10">
-          {/* 1. ขนาด - ปรับให้ปุ่มใหญ่ขึ้น */}
+          {/* 1. ขนาด */}
           <section>
             <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4 block">
               1. เลือกขนาด
@@ -115,7 +136,7 @@ const OptionsModal = ({ product, isOpen, onClose, onConfirm }) => {
             </div>
           </section>
 
-          {/* 2. รูปแบบ - น้ำ/แห้ง */}
+          {/* 2. รูปแบบ */}
           <section>
             <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4 block">
               2. รูปแบบ
@@ -137,7 +158,7 @@ const OptionsModal = ({ product, isOpen, onClose, onConfirm }) => {
             </div>
           </section>
 
-          {/* 3. เลือกเส้น - ปรับ Grid 2 คอลัมน์ให้ตัวหนังสือไม่เบียด */}
+          {/* 3. เลือกเส้น */}
           <section>
             <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4 block">
               3. เลือกเส้น
@@ -159,7 +180,7 @@ const OptionsModal = ({ product, isOpen, onClose, onConfirm }) => {
             </div>
           </section>
 
-          {/* 4. ส่วนผสม - ใช้ col-span เพื่อเน้นปุ่ม "ใส่ครบ" */}
+          {/* 4. ส่วนผสมหลัก */}
           <section>
             <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4 block">
               4. ส่วนผสมหลัก
@@ -191,38 +212,90 @@ const OptionsModal = ({ product, isOpen, onClose, onConfirm }) => {
             </div>
           </section>
 
-          {/* 5. สิ่งที่ไม่ใส่ - ปรับเป็น 3 คอลัมน์ให้เลือกง่าย */}
+          {/* 5. สิ่งที่ไม่ใส่ */}
           <section>
             <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4 block">
               5. สิ่งที่ไม่ใส่ (Extra No)
             </label>
             <div className="grid grid-cols-3 gap-2">
-              {["พริก", "ผัก", "กากหมู", "ถั่ว", "ถั่วงอก", "ผักบุ้ง"].map(
-                (s) => (
-                  <button
-                    key={s}
-                    onClick={() => toggleExcluded(s)}
-                    className={`py-3 rounded-2xl text-xs font-bold border-2 transition-all active:scale-95 ${
-                      excludedItems.includes(s)
-                        ? "border-red-500 bg-red-50 text-red-600 shadow-sm"
-                        : "border-gray-50 bg-gray-50 text-gray-400"
-                    }`}
-                  >
-                    {s}
-                  </button>
-                ),
-              )}
+              {["พริก", "ผัก", "กากหมู", "ถั่ว"].map((s) => (
+                <button
+                  key={s}
+                  onClick={() => toggleExcluded(s)}
+                  className={`py-3 rounded-2xl text-xs font-bold border-2 transition-all active:scale-95 ${
+                    excludedItems.includes(s)
+                      ? "border-red-500 bg-red-50 text-red-600 shadow-sm"
+                      : "border-gray-50 bg-gray-50 text-gray-400"
+                  }`}
+                >
+                  {s}
+                </button>
+              ))}
             </div>
+          </section>
+
+          {/* ✅ 6. เพิ่มท็อปปิ้ง (+10 บาท) */}
+          <section>
+            <div className="flex justify-between items-center mb-4">
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] block">
+                6. เพิ่มท็อปปิ้ง (+10฿/อย่าง)
+              </label>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {/* รายการท็อปปิ้งสามารถปรับแก้ตรงนี้ได้เลยครับ */}
+              {[
+                "ตับ",
+                "เลือด",
+                "หนังหมู",
+                "ผักบุ้ง",
+                "ลูกชิ้นหมู",
+                "ลูกชิ้นหมูหนึบ",
+                "เต้าหู้หมูหนึบ",
+                "ปลาแผ่น",
+                "ลูกชิ้นปลา",
+                "ไส้",
+                "หมูนุ่ม",
+                "เกี๊ยว",
+                "หมูบะช่อ",
+                "ถั่วงอก",
+                "หมูแดง",
+              ].map((addon) => (
+                <button
+                  key={addon}
+                  onClick={() => toggleAddon(addon)}
+                  className={`py-3 rounded-2xl text-xs font-bold border-2 transition-all active:scale-95 ${
+                    extraAddons.includes(addon)
+                      ? "border-blue-500 bg-blue-50 text-blue-600 shadow-sm"
+                      : "border-gray-50 bg-gray-50 text-gray-400"
+                  }`}
+                >
+                  + {addon}
+                </button>
+              ))}
+            </div>
+          </section>
+
+          {/* ✅ 7. ช่องหมายเหตุ */}
+          <section>
+            <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4 block">
+              7. หมายเหตุ (เพิ่มเติม)
+            </label>
+            <textarea
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="เช่น ขอรสจัดๆ, แยกน้ำ, ไม่ใส่ชูรส ฯลฯ"
+              className="w-full border-2 border-gray-100 bg-gray-50 rounded-2xl p-4 text-sm font-bold text-gray-900 focus:outline-none focus:border-zinc-900 focus:bg-white transition-all resize-none h-24 placeholder:text-gray-300 placeholder:font-medium"
+            ></textarea>
           </section>
         </div>
 
-        {/* Footer - ปรับให้ปุ่มยืนยันใหญ่และเด่นที่สุด */}
+        {/* Footer */}
         <div className="p-6 sm:p-8 bg-gray-50 border-t border-gray-100 space-y-4 pb-10 sm:pb-8">
           <div className="flex justify-between items-center px-2">
             <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">
               รวมค่าอาหาร
             </span>
-            <span className="text-3xl font-black text-zinc-900">
+            <span className="text-3xl font-black text-zinc-900 tabular-nums">
               ฿{totalPrice.toLocaleString()}
             </span>
           </div>
