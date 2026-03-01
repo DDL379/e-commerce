@@ -1,8 +1,21 @@
 import "./styles/print.css";
 
 const KitchenSlip = ({ data }) => {
-  const items = data?.items || data?.cartItems || [];
+  const rawItems = data?.items || data?.cartItems || [];
+
+  const items = rawItems.filter((item) => {
+    const hasDiscountOption =
+      item.options?.isDiscount === true || item.options?.isDiscount === "true";
+    const isDiscountByName =
+      item.name?.includes("บัตรส่วนลด") ||
+      item.menuName?.includes("บัตรส่วนลด");
+
+    return !hasDiscountOption && !isDiscountByName;
+  });
+
   const tableNum = data?.tableNumber || "-";
+
+  if (items.length === 0) return null;
 
   return (
     <div className="kitchen-slip-wrapper">
