@@ -12,6 +12,25 @@ import {
 } from "lucide-react";
 import OrderDetailModal from "../../components/dashboard/OrderDetailModal";
 
+const formatPaymentMethod = (method) => {
+  if (!method) return "-";
+  if (method === "CASH") return "เงินสด";
+  if (method === "TRANSFER") return "เงินโอน";
+
+  if (method.startsWith("SPLIT")) {
+    const cashMatch = method.match(/CASH=(\d+)/);
+    const transferMatch = method.match(/TRANSFER=(\d+)/);
+    const cash = cashMatch ? Number(cashMatch[1]).toLocaleString() : "0";
+    const transfer = transferMatch
+      ? Number(transferMatch[1]).toLocaleString()
+      : "0";
+
+    return `แยกจ่าย: สด ฿${cash} / โอน ฿${transfer}`;
+  }
+
+  return method;
+};
+
 const DashboardPage = () => {
   const navigate = useNavigate();
   const [summary, setSummary] = useState(null);
@@ -204,12 +223,15 @@ const DashboardPage = () => {
                     >
                       ฿{Number(order.totalAmount).toLocaleString()}
                     </p>
+                    {/* ✅ เรียกใช้ฟังก์ชัน formatPaymentMethod ตรงนี้ครับ */}
                     <span
                       className={`text-[9px] font-black uppercase tracking-widest ${
                         isCancelled ? "text-red-400" : "text-green-500"
                       }`}
                     >
-                      {isCancelled ? "CANCELLED" : order.paymentMethod}
+                      {isCancelled
+                        ? "CANCELLED"
+                        : formatPaymentMethod(order.paymentMethod)}
                     </span>
                   </div>
                 </div>

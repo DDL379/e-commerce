@@ -1,5 +1,24 @@
 import { X, ReceiptText } from "lucide-react";
 
+const formatPaymentMethod = (method) => {
+  if (!method) return "N/A";
+  if (method === "CASH") return "เงินสด";
+  if (method === "TRANSFER") return "เงินโอน";
+
+  if (method.startsWith("SPLIT")) {
+    const cashMatch = method.match(/CASH=(\d+)/);
+    const transferMatch = method.match(/TRANSFER=(\d+)/);
+    const cash = cashMatch ? Number(cashMatch[1]).toLocaleString() : "0";
+    const transfer = transferMatch
+      ? Number(transferMatch[1]).toLocaleString()
+      : "0";
+
+    return `แยกจ่าย: สด ฿${cash} / โอน ฿${transfer}`;
+  }
+
+  return method;
+};
+
 const OrderDetailModal = ({ isOpen, onClose, order }) => {
   if (!isOpen || !order) return null;
 
@@ -76,8 +95,9 @@ const OrderDetailModal = ({ isOpen, onClose, order }) => {
             <span className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">
               การชำระเงิน
             </span>
+            {/* ✅ เรียกใช้ฟังก์ชัน formatPaymentMethod ตรงนี้ครับ */}
             <span className="bg-zinc-800 px-3 py-1 rounded-lg text-[10px] font-black uppercase text-orange-400">
-              {order.paymentMethod || "N/A"}
+              {formatPaymentMethod(order.paymentMethod)}
             </span>
           </div>
           <div className="flex justify-between items-center">

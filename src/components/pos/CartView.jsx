@@ -12,34 +12,10 @@ import useCartStore from "../../store/useCartStore";
 import { addOrderItems } from "../../api/axios";
 
 const CartView = ({ isOpen, onClose, orderId, tableId, onSuccess }) => {
-  // ✅ อย่าลืมดึงฟังก์ชันเพิ่มลงตะกร้ามาด้วย (ในที่นี้สมมติชื่อ addToCart)
-  const { cart, updateQuantity, removeFromCart, clearCart, addToCart } =
-    useCartStore();
+  const { cart, updateQuantity, removeFromCart, clearCart } = useCartStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen) return null;
-
-  // ✅ ฟังก์ชันสำหรับกดเพิ่ม "บัตรส่วนลด" (-60 บาท)
-  const handleAddDiscount = () => {
-    const existingIndex = cart.findIndex((item) => item.options?.isDiscount);
-
-    if (existingIndex !== -1) {
-      // ถ้ามีบัตรส่วนลดอยู่แล้ว ให้บวกจำนวนขึ้น 1
-      updateQuantity(existingIndex, cart[existingIndex].quantity + 1);
-    } else {
-      // ถ้ายังไม่มี ให้สร้างไอเทมจำลองราคาติดลบ
-      addToCart({
-        id: "discount-card",
-        name: "🎟️ บัตรส่วนลด",
-        price: -60,
-        quantity: 1,
-        options: {
-          isDiscount: true,
-          totalPrice: -60,
-        },
-      });
-    }
-  };
 
   const handleConfirmOrder = async () => {
     if (cart.length === 0) return;
@@ -52,7 +28,7 @@ const CartView = ({ isOpen, onClose, orderId, tableId, onSuccess }) => {
         quantity: item.quantity,
         price: item.options?.totalPrice ?? item.price,
         options: {
-          ...item.options, // จะส่ง extraAddons, note, isDiscount ไปให้อัตโนมัติ
+          ...item.options,
           excluded: item.options?.excluded || [],
         },
       }));
@@ -112,69 +88,57 @@ const CartView = ({ isOpen, onClose, orderId, tableId, onSuccess }) => {
           ) : (
             cart.map((item, index) => {
               const itemPrice = item.options?.totalPrice || item.price;
-              const isDiscount = item.options?.isDiscount;
 
               return (
                 <div
                   key={index}
-                  className={`p-4 sm:p-5 rounded-[2rem] flex flex-col gap-3 transition-all shadow-sm border ${
-                    isDiscount
-                      ? "bg-orange-50/50 border-orange-100"
-                      : "bg-gray-50 border-transparent hover:border-orange-100"
-                  }`}
+                  className="p-4 sm:p-5 rounded-[2rem] flex flex-col gap-3 transition-all shadow-sm border bg-gray-50 border-transparent hover:border-orange-100"
                 >
                   <div className="flex justify-between items-start gap-2">
                     <div className="flex-1 min-w-0">
-                      <h4
-                        className={`font-black text-base sm:text-lg leading-tight truncate ${isDiscount ? "text-orange-600" : "text-gray-800"}`}
-                      >
+                      <h4 className="font-black text-base sm:text-lg leading-tight truncate text-gray-800">
                         {item.name}
                       </h4>
 
-                      {/* ✅ แสดงรายละเอียดอาหาร (ซ่อนถ้าเป็นบัตรส่วนลด) */}
-                      {!isDiscount && (
-                        <div className="mt-1.5 flex flex-col gap-1.5">
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="text-[9px] font-black bg-zinc-900 text-white px-2 py-0.5 rounded-md uppercase">
-                              {item.options?.size || "S"}
-                            </span>
-                            <span className="text-[10px] sm:text-[11px] font-bold text-gray-500 italic">
-                              {item.options?.noodle} • {item.options?.format}
-                            </span>
-                          </div>
-
-                          {/* สิ่งที่ไม่ใส่ (Excluded) */}
-                          {item.options?.excluded?.length > 0 && (
-                            <div className="flex items-center gap-1 text-[9px] sm:text-[10px] font-bold text-red-500 bg-red-50 px-2 py-1 rounded-lg w-fit border border-red-100">
-                              <AlertCircle size={10} />
-                              ไม่ใส่: {item.options.excluded.join(", ")}
-                            </div>
-                          )}
-
-                          {/* ✅ ท็อปปิ้ง (Extra Addons) */}
-                          {item.options?.extraAddons?.length > 0 && (
-                            <div className="flex items-center gap-1 text-[9px] sm:text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-lg w-fit border border-blue-100">
-                              <Plus size={10} strokeWidth={3} />
-                              {item.options.extraAddons.join(", ")}
-                            </div>
-                          )}
-
-                          {/* ✅ หมายเหตุ (Note) */}
-                          {item.options?.note && (
-                            <div className="flex items-start gap-1 text-[10px] sm:text-[11px] font-bold text-zinc-700 bg-zinc-200/60 px-2 py-1.5 rounded-lg w-fit border border-zinc-200">
-                              📝 {item.options.note}
-                            </div>
-                          )}
+                      {/* รายละเอียดอาหาร */}
+                      <div className="mt-1.5 flex flex-col gap-1.5">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="text-[9px] font-black bg-zinc-900 text-white px-2 py-0.5 rounded-md uppercase">
+                            {item.options?.size || "S"}
+                          </span>
+                          <span className="text-[10px] sm:text-[11px] font-bold text-gray-500 italic">
+                            {item.options?.noodle} • {item.options?.format}
+                          </span>
                         </div>
-                      )}
+
+                        {/* สิ่งที่ไม่ใส่ (Excluded) */}
+                        {item.options?.excluded?.length > 0 && (
+                          <div className="flex items-center gap-1 text-[9px] sm:text-[10px] font-bold text-red-500 bg-red-50 px-2 py-1 rounded-lg w-fit border border-red-100">
+                            <AlertCircle size={10} />
+                            ไม่ใส่: {item.options.excluded.join(", ")}
+                          </div>
+                        )}
+
+                        {/* ท็อปปิ้ง (Extra Addons) */}
+                        {item.options?.extraAddons?.length > 0 && (
+                          <div className="flex items-center gap-1 text-[9px] sm:text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-lg w-fit border border-blue-100">
+                            <Plus size={10} strokeWidth={3} />
+                            {item.options.extraAddons.join(", ")}
+                          </div>
+                        )}
+
+                        {/* หมายเหตุ (Note) */}
+                        {item.options?.note && (
+                          <div className="flex items-start gap-1 text-[10px] sm:text-[11px] font-bold text-zinc-700 bg-zinc-200/60 px-2 py-1.5 rounded-lg w-fit border border-zinc-200">
+                            📝 {item.options.note}
+                          </div>
+                        )}
+                      </div>
                     </div>
 
                     {/* ราคา */}
-                    <p
-                      className={`font-black text-base sm:text-lg whitespace-nowrap ${isDiscount ? "text-orange-600" : "text-zinc-900"}`}
-                    >
-                      {isDiscount ? "" : "฿"}
-                      {(itemPrice * item.quantity).toLocaleString()}
+                    <p className="font-black text-base sm:text-lg whitespace-nowrap text-zinc-900">
+                      ฿{(itemPrice * item.quantity).toLocaleString()}
                     </p>
                   </div>
 
@@ -212,18 +176,6 @@ const CartView = ({ isOpen, onClose, orderId, tableId, onSuccess }) => {
 
         {/* Footer */}
         <div className="p-6 sm:p-8 bg-gray-50 border-t border-gray-100 rounded-b-[0] sm:rounded-b-[3rem] pb-8 sm:pb-8 flex flex-col gap-4">
-          {/* ✅ ส่วนควบคุมบัตรส่วนลด */}
-          {cart.length > 0 && (
-            <div className="flex justify-start">
-              <button
-                onClick={handleAddDiscount}
-                className="flex items-center gap-1.5 text-[11px] font-black text-orange-600 bg-orange-100/50 hover:bg-orange-100 px-3 py-2 rounded-xl transition-all active:scale-95 border border-orange-200"
-              >
-                <Plus size={14} strokeWidth={3} /> เพิ่มบัตรส่วนลด (-60฿)
-              </button>
-            </div>
-          )}
-
           {/* สรุปยอดรวม */}
           <div className="flex justify-between items-end px-2">
             <span className="text-gray-400 font-bold uppercase tracking-[0.2em] text-[10px] sm:text-xs mb-1">
